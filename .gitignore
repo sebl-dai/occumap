@@ -1,0 +1,23 @@
+# Python
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+dist/
+build/
+
+# Environment variables (API keys etc)
+.env
+
+# Data files - never push real member data
+data/raw/
+data/output/
+*.csv
+*.xlsx
+
+# OS
+.DS_Store
+
+# Jupyter
+.ipynb_checkpoints/
