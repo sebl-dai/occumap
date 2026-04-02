@@ -18,6 +18,7 @@ data/output/
 
 # Exception - synthetic data is safe to push
 !data/synthetic_titles.csv
+!data/synthetic_results.csv
 
 # OS
 .DS_Store
