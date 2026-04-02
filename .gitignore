@@ -16,6 +16,9 @@ data/output/
 *.csv
 *.xlsx
 
+# Exception - synthetic data is safe to push
+!data/synthetic_titles.csv
+
 # OS
 .DS_Store
 
