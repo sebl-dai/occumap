@@ -126,39 +126,6 @@ Classification results feed a Tableau analytics dashboard with four views:
 
 ---
 
-## Getting Started
-
-### Prerequisites
-
-- Python 3.10+
-- Anthropic API key ([console.anthropic.com](https://console.anthropic.com))
-- SSOC 2024 Detailed Definitions xlsx 
-  ([SingStat](https://www.singstat.gov.sg/standard-classifications/national-classifications/singapore-standard-occupational-classification-ssoc))
-
-### Setup
-```bash
-git clone https://github.com/sebl-dai/occumap.git
-cd occumap
-python3 -m venv .venv
-source .venv/bin/activate
-pip install -r requirements.txt
-```
-
-Create your `.env` file:
-```bash
-cp .env.example .env
-# Add your Anthropic API key to .env
-```
-
-### Run the classifier
-```bash
-python src/parse_ssoc.py        # Parse SSOC definitions
-python src/classify.py          # Run classification on synthetic titles
-streamlit run app/review_app.py # Launch human review UI
-```
-
----
-
 ## Data Sources
 
 SSOC 2024 published by the Singapore Department of Statistics:
