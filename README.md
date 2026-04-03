@@ -144,5 +144,5 @@ https://www.singstat.gov.sg/standard-classifications/national-classifications/si
 
 ✅ Classification pipeline — complete  
 ✅ Human review queue (Streamlit) — complete  
-🚧 Tableau dashboard — in progress  
-🚧 Notebook — in progress
+✅ Tableau dashboard — complete
+✅ Notebook — complete
