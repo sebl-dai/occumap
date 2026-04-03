@@ -8,7 +8,7 @@ OccuMap occupation classifier.
 
 ## Problem Statement
 
-Occupation title fields in membership and CRM systems are free-text 
+Occupation title fields in CRM systems are free-text 
 and self-reported. The result is tens of thousands of inconsistent, 
 unstandardised entries that make workforce segmentation unreliable 
 at scale.
@@ -98,7 +98,7 @@ free-text explanation instead of a structured classification.
 ```
 
 ### 3. Confidence Scoring + Thresholding
-Every classification includes a self-reported confidence score 
+Every classification includes a LLM self-reported confidence score 
 (0.0–1.0). Records below the threshold (default: 0.75) are 
 automatically flagged for human review regardless of the label.
 
@@ -217,9 +217,8 @@ does not override the LLM classification.
 
 ## Data
 
-All occupation titles used in this project are synthetic or 
-anonymised. No real member data is used or stored in this 
-repository.
+All occupation titles used in this project are synthetic. 
+No real member data is used or stored in this repository.
 
 SSOC 2024 Detailed Definitions sourced from:
 https://www.singstat.gov.sg/standard-classifications/national-classifications/singapore-standard-occupational-classification-ssoc
