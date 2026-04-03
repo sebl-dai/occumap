@@ -106,9 +106,7 @@ occumap/
 
 Classification results feed a Tableau analytics dashboard  
 
-- **Workforce breakdown** — PME / T / RNF distribution
-- **Confidence distribution** — model certainty across all classifications
-- **Review queue** — low-confidence cases flagged for human review
+![OccuMap Dashboard](assets/dashboard_preview.png)
 
 ---
 
