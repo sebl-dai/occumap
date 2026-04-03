@@ -13,12 +13,14 @@ build/
 # Data files - never push real member data
 data/raw/
 data/output/
+data/reviewed_labels.csv
 *.csv
 *.xlsx
 
 # Exception - synthetic data is safe to push
 !data/synthetic_titles.csv
 !data/synthetic_results.csv
+
 
 # OS
 .DS_Store
