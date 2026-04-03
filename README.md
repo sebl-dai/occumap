@@ -16,24 +16,24 @@ No real member data is used or stored.
 ## The Problem
 
 Occupation title fields in membership and CRM systems are free-text 
-and self-reported. People write whatever they want. The result is tens 
-of thousands of inconsistent, unstandardised entries that make 
-workforce segmentation unreliable at scale.
+and self-reported. The result is tens of thousands of inconsistent, 
+unstandardised entries that make workforce segmentation unreliable 
+at scale.
 
-Some examples of what you actually see:
+Some examples of what you actually see in a real CRM:
 
 | Raw Input | Challenge |
 |---|---|
-| `manager` | PME, or an inflated title? |
-| `engineer` | Software engineer (PME) or plant operator (RNF)? |
-| `self employed` | No occupational signal |
-| `XXX driver` | RNF, but needs to be caught cleanly |
-| `retired` | Not currently in the workforce |
+| `MANAGER` | PME, or an inflated title? |
+| `ENGINEER` | Software engineer (PME) or plant operator (RNF)? |
+| `SELF EMPLOYED` | No occupational signal |
+| `GRAB DRIVER` | RNF — but needs to be caught cleanly |
+| `RETIRED` | Not currently in the workforce |
+| `SNR MKTG MGR` | Abbreviated — needs normalisation |
 | `-` / blank / `NA` | Unclassifiable noise |
 
-Without a reliable classification, any downstream segmentation — 
-targeted outreach, policy advocacy, benefit design — is built on 
-shaky ground.
+Without a reliable classification, any downstream segmentation 
+is built on shaky ground.
 
 ---
 
@@ -48,33 +48,28 @@ human-readable reasoning for every decision.
 
 | Label | SSOC Major Groups | Description |
 |---|---|---|
-| **PME** | 1, 2 | Managers and Professionals |
+| **PME** | 1, 2 | Professionals, Managers, Executives |
 | **T** | 3 | Technicians & Associate Professionals |
 | **RNF** | 4–9 | Clerical, Services, Craft, Operators, Labourers |
 | **NA** | X | Retired, self-employed, blank, unclassifiable |
-
-### Edge Case Rules
-
-- Any title containing `manager` → PME
-- Any title containing `engineer` → PME (default)
-- `XXX driver` → RNF
-- `self-employed`, `retired`, blank → NA
-- Ambiguous or low-confidence → flagged for human review
 
 ---
 
 ## Consistency Mechanisms
 
-LLM inference can be variable. The same prompt does not always produce 
-the same output. OccuMap implements five mechanisms to address this:
+LLM inference can be variable. OccuMap implements six mechanisms 
+to address this:
 
 | # | Mechanism | What it does |
 |---|---|---|
-| 1 | **Temperature = 0** | Forces deterministic output for identical inputs |
+| 1 | **Temperature = 0** | Deterministic output for identical inputs |
 | 2 | **Structured JSON output** | Constrains response format, prevents drift |
-| 3 | **Confidence scoring + thresholding** | Auto-accepts high confidence results, flags low confidence for human review |
+| 3 | **Confidence scoring + thresholding** | Auto-accepts high confidence, flags low confidence for human review |
 | 4 | **Majority voting** | Runs each title N times, takes the most common result |
-| 5 | **Prompt versioning** | Locks the prompt so results are reproducible and auditable across batch runs |
+| 5 | **Prompt versioning** | Every output tagged with prompt version for auditability |
+| 6 | **Dynamic SSOC candidate injection** | Injects real SSOC codes into the prompt, preventing hallucination |
+
+See [METHODOLOGY.md](METHODOLOGY.md) for full details.
 
 ---
 
@@ -92,19 +87,15 @@ the same output. OccuMap implements five mechanisms to address this:
 ## Project Structure
 ```
 occumap/
-├── src/
-│   ├── parse_ssoc.py         # Parse SSOC xlsx into structured CSV
-│   ├── classify.py           # Claude API classifier with all 5 
-│   │                         # consistency mechanisms
-│   └── pipeline.py           # Batch processing pipeline
 ├── app/
 │   └── review_app.py         # Streamlit human-in-the-loop review UI
 ├── data/
-│   ├── ssoc_definitions.csv  # Parsed SSOC 2024 knowledge base
-│   └── synthetic_titles.csv  # Anonymised test occupation titles
-├── dashboard/
-│   └── occumap.twbx          # Tableau analytics dashboard
-├── .env.example              # API key template (never commit .env)
+│   ├── synthetic_titles.csv  # Anonymised test occupation titles (297)
+│   └── synthetic_results.csv # Classification results
+├── src/
+│   └── generate_synthetic.py # Synthetic dataset generator
+├── .env.example              # API key template
+├── METHODOLOGY.md            # Full methodology documentation
 ├── requirements.txt
 └── README.md
 ```
@@ -113,20 +104,36 @@ occumap/
 
 ## Dashboard
 
-Classification results feed a Tableau analytics dashboard with four views:
+Classification results feed a Tableau analytics dashboard with 
+four views:
 
-- **Workforce breakdown** — PME / T / RNF distribution across the 
-  classified dataset
-- **Confidence distribution** — model certainty across all 
-  classifications
-- **Review queue** — low-confidence cases flagged for human review, 
-  with reasoning visible
-- **Segment explorer** — filter and slice classifications by 
-  demographic or input variable
+- **Workforce breakdown** — PME / T / RNF distribution
+- **Confidence distribution** — model certainty across all classifications
+- **Review queue** — low-confidence cases flagged for human review
+- **Segment explorer** — filter by demographic or input variable
 
 ---
 
-## Data Sources
+## Results (synthetic dataset, 297 titles)
+
+| Label | Count | % |
+|---|---|---|
+| PME | 128 | 43% |
+| RNF | 86 | 29% |
+| T | 73 | 25% |
+| NA | 10 | 3% |
+
+- Average model confidence: **0.893**
+- Auto-accepted: **268** (90%)
+- Sent to human review: **29** (10%)
+- Human reviewed: **19**
+
+---
+
+## Data
+
+All occupation titles are synthetic or anonymised. No real member 
+data is used or stored in this repository.
 
 SSOC 2024 published by the Singapore Department of Statistics:
 https://www.singstat.gov.sg/standard-classifications/national-classifications/singapore-standard-occupational-classification-ssoc
@@ -135,10 +142,7 @@ https://www.singstat.gov.sg/standard-classifications/national-classifications/si
 
 ## Status
 
-🚧 In active development
-
----
-
-## Author
-
-[sebl-dai](https://github.com/sebl-dai)
+✅ Classification pipeline — complete  
+✅ Human review queue (Streamlit) — complete  
+🚧 Tableau dashboard — in progress  
+🚧 Notebook — in progress
