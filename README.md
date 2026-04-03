@@ -110,6 +110,14 @@ Classification results feed a Tableau analytics dashboard
 
 ---
 
+## Human Review Queue
+
+Low-confidence and disputed classifications are surfaced in a Streamlit review app. Reviewers can accept the LLM label or override it with a reason. Reviewed records are merged back into the final output.
+
+![OccuMap Review Queue](assets/streamlit_preview.png)
+
+---
+
 ## Results (synthetic dataset, 297 titles)
 
 | Label | Count | % |
