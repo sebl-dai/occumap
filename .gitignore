@@ -26,4 +26,4 @@ data/reviewed_labels.csv
 .DS_Store
 
 # Jupyter
-.ipynb_checkpoints/
+.ipynb_checkpoints/.env
