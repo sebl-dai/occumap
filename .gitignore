@@ -28,3 +28,4 @@ data/reviewed_labels.csv
 # Jupyter
 .ipynb_checkpoints/.env
 .ipynb_checkpoints/
+!data/ssoc2024-detailed-definitions.xlsx
