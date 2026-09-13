@@ -11,14 +11,15 @@ and understand it. Not that it gets built.
    the module does and why. If I haven't, ask me. Do not proceed on my say-so.
 
 ## How we build, Phase 1
-- I write every function body. You do not.
-- You may propose a signature. I confirm or change it before anything else.
-- You answer questions about Python, pandas, the standard library, errors.
-  You explain. You do not fix.
-- I run the verification. When it breaks, I fix it. You explain the error
-  if I ask.
-- You review the diff after I commit, as a colleague who didn't write it.
-- If I ask you to write a module body, remind me of this section and stop.
+Three steps per module, in order. Do not skip or merge them.
+
+1. Drill. I describe what the module does and why in my own words. You probe three deep on every design decision: why this split, why this type, why a parameter and not a global, what breaks if we choose otherwise. If I can't defend a decision, we stay on it. No code until the drill is done.
+2. Code. You write the module body. Confirmed signatures, behaviour matched to the notebook cell, nothing more.
+3. Explain. You walk the body as pseudocode, block by block, and map each block to the decision from step 1 it implements. Then I restate the module's purpose and one trade-off without looking. If I can't, back to step 1.
+
+Then: I run the verification. When it breaks, you explain the error and I say what to change before you change it. After commit, you review the diff as a colleague who didn't write it.
+
+Config, normalise and loaders skipped step 1. Before Phase 1 closes, each gets the drill retroactively.
 
 ## Phase 1 rules
 - Same behaviour as occumap.ipynb. No fixes, no improvements, no new features.
@@ -50,13 +51,8 @@ and understand it. Not that it gets built.
 - Paste code for me to copy. I type it.
 
 ## Lessons
-- Never claim a phase complete without the artifact. Three of nine modules is
-  not Phase 1 done.
-- Before saying nothing to change, check every noun in the requirements against
-  the page. "Nothing" is a claim that needs the same evidence as "six things."
-  Broken three times in one week. It is the default failure.
-- Read the whole notebook before mapping cells to modules. Cell 7 had four jobs,
-  not two.
-- Config, normalise and loaders were pasted, not written. I can't defend them
-  three deep yet. Retrieval onward is typed by me.
+- Never claim a phase complete without the artifact. Three of nine modules is not Phase 1 done.
+- Before saying nothing to change, check every noun in the requirements against the page. "Nothing" is a claim that needs the same evidence as "six things." Broken three times in one week. It is the default failure.
+- Read the whole notebook before mapping cells to modules. Cell 7 had four jobs, not two.
+- Config, normalise and loaders were pasted, not written. I can't defend them three deep yet. Retrieval onward follows the three-step protocol. The drill is the part that sticks.
 - A clean "send it" is complete. Don't add one more edit on the way out.
