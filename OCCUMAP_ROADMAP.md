@@ -15,7 +15,7 @@ Detail decays with distance. The current phase is fully detailed. Later phases a
 ## Rules of engagement
  
 1. **Concept before code.** Every step gets its what and why before implementation. If code arrives without the concept, stop.
-2. **Sebastian types.** From retrieval onward, every function body is typed by Sebastian. The agent proposes signatures, answers questions, explains errors, and reviews committed diffs. It does not write bodies. Config, normalise and loaders were pasted and are flagged as such; they get re-read until they can be defended three deep.
+2. **Drill, code, explain.** From retrieval onward, each module runs three steps in order. Drill: Sebastian describes the module and defends every design decision three deep under the agent's probing. Code: the agent writes the body to the confirmed signatures, matched to the notebook. Explain: the agent walks the body as pseudocode mapped to the drill's decisions, then Sebastian restates the purpose and one trade-off without looking. Sebastian runs verification; the agent explains errors and changes code only after Sebastian says what to change. Config, normalise and loaders were pasted and are flagged as such; they get re-read until they can be defended three deep.
 3. **No phase skipping.** Exit criteria pass before the next phase opens.
 4. **Closeout ritual.** A phase ends with (a) exit criteria demonstrated, (b) README updated, (c) NOTES.md updated with what was learned, (d) this roadmap re-read and struck where the work disproved it.
 5. **Session cadence.** Sessions happen when they happen. A skipped session shifts the plan; it does not break it. No weekday versus weekend rule.
@@ -51,7 +51,7 @@ Findings worth keeping:
 | `config.py` | Done, pasted | `client` constructed at import. Fix in Phase 2: `get_client()`. |
 | `normalise.py` | Done, pasted | Pure. Carries the `ns man` substring bug (see Known bugs). |
 | `loaders.py` | Done, pasted | 297 titles, 1006 five-digit codes. `DATA_DIR` resolves relative to source; breaks in a container. Warnings unsuppressed. No column validation. |
-| `retrieval.py` | Next | Typed by Sebastian. Design below. |
+| `retrieval.py` | Next | Drill done 14 September. Body written by Claude Code. Design below. |
 | `classify.py` | Empty | Cell 7 first half plus `major_group_context` from cell 6: prompt assembly, single API call, response parsing, parallel calls over `n_runs`, fallback result when every call fails. |
 | `voting.py` | Empty | Cell 7 second half: `Counter`, winner, accept rule. Pure. |
 | `pipeline.py` | Empty | Cell 4 apply, cell 9 batch loop, cell 10 results CSV write. |
@@ -76,9 +76,9 @@ Split it:
 Kept in NOTES.md, the single list. Not repeated here so the two cannot drift.
 ### Remaining steps
  
-1. Retrieval, typed, verified against cell 6 on three titles.
-2. Classify and voting, typed, verified.
-3. Pipeline and reconcile, typed. The double `preprocess()` call is kept as is; it is fixed in Phase 2.
+1. Retrieval: drill, code, explain, verified against cell 6 on three titles.
+2. Classify and voting: drill, code, explain, verified.
+3. Pipeline and reconcile: drill, code, explain. The double `preprocess()` call is kept as is; it is fixed in Phase 2.
 4. CLI.
 5. Parity check: run the package over `synthetic_titles.csv`, diff against `synthetic_results.csv`. Same output or find why.
 6. Archive the notebook into `notebooks/legacy/`.

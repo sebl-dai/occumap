@@ -48,7 +48,8 @@ Config, normalise and loaders skipped step 1. Before Phase 1 closes, each gets t
 - Refactor beyond the current module.
 - Add dependencies without asking.
 - Explain a concept after writing the code. Concept first, then code.
-- Paste code for me to copy. I type it.
+- Write a module body before the drill is done. Once it is, Claude Code writes
+  the body.
 
 ## Lessons
 - Never claim a phase complete without the artifact. Three of nine modules is not Phase 1 done.

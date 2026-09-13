@@ -17,13 +17,21 @@
   - Lexical scorer is frozen after Phase 1. TF-IDF and dense retrievers are separate modules in Phase 6.
 - Cell numbers in all docs are 0-indexed (cell 0 is the title markdown).
 - Extraction order corrected to what happened: config, normalise, loaders.
+- Build protocol changed in CLAUDE.md: drill, code, explain, per module, in order. Claude writes bodies after the drill passes. Config, normalise and loaders get the drill retroactively before Phase 1 closes.
+- Retrieval drill done across this session. Design locked:
+  - Candidate(ssoc_code: str, title: str, split: str, score: float), frozen.
+  - retrieve(title: str | None, ssoc: pd.DataFrame, k: int) -> list[Candidate]. k has no default, so retrieval.py does not import config. Caller passes TOP_N_CANDIDATES.
+  - format_candidates(candidates: list[Candidate]) -> str.
+  - Stopwords as a constant in retrieval.py. Scoring nested inside retrieve.
+- Lexical vs semantic: build lexical exactly as cell 6. Semantic is Phase 6, measured against this baseline. New dependencies (sklearn, sentence-transformers, torch, FAISS, MLflow) get asked about when Phase 6 needs them.
 
 ## Phase 1, done so far
-- config.py, normalise.py, loaders.py extracted. Pasted, not typed. Re-read until defensible.
+- config.py, normalise.py, loaders.py extracted. Pasted, skipped the drill. Each gets the drill retroactively before Phase 1 closes.
 - pyproject.toml: hatchling, src layout, runtime and dev deps split. Editable install works.
 - config checked: MODEL, PROMPT_VERSION, CONFIDENCE_THRESHOLD, MAJORITY_VOTE_RUNS match cell 2. BATCH_SIZE matches cell 9. TOP_N_CANDIDATES matches cell 6 default top_n=15.
 - loaders verified: 297 titles, 1006 five-digit codes. Split distribution RNF 395, PME 390, T 216, NA 5 (the five are X-codes, legitimate).
 - normalise verified on four cases: whitespace collapse, override before driver rule, short string, None.
+- retrieval.py: drill, code, explain done 14 Sep. Verified: format_candidates(retrieve(t, load_ssoc(), 15)) == notebook get_ssoc_candidates(t) on six named cases (SOFTWARE ENGINEER, ASST MGR SALES, ART TEACHER, empty, SENIOR ASSISTANT, ZZQX) and on all 297 synthetic titles, raw and cleaned. load_ssoc() frame equals notebook ssoc_5digit. Claude wrote and ran the check at my request, an exception to "I run the verification".
 
 ## Known bugs, logged not fixed
 All fixed in Phase 2 with a test that captures them, unless stated otherwise.
@@ -33,6 +41,7 @@ All fixed in Phase 2 with a test that captures them, unless stated otherwise.
 - loaders: openpyxl warnings not suppressed. Notebook cell 1 did this.
 - loaders: no column validation after read_excel. If SingStat shifts header=4, columns misname silently.
 - cell 4: preprocess() called twice per row.
+- cell 6: NaN title passes the `not title` guard (NaN is truthy), becomes the word "nan", and substring-matches "finance", "maintenance". 0 of 297 synthetic titles are blank, so current results are unaffected. A CLI call could hit it.
 - cell 6: scoring runs .apply(score, axis=1) across ~1000 rows per title. Not fixed in the lexical scorer, which stays frozen as the Phase 6 baseline. The Phase 6 TF-IDF retriever is the replacement.
 - cell 7: except Exception: return None swallows everything. Ruff BLE001.
 - cell 7: single_api_call(title, prompt) never uses title.
@@ -42,5 +51,6 @@ All fixed in Phase 2 with a test that captures them, unless stated otherwise.
 - Fast path never skips the LLM. Cell 9 process_row calls classify_title on every row, including rows preprocess already labelled. The rule label only feeds AGREE/DISAGREE. Cell 0 says the rules fast-path obvious cases before the LLM. Bug or intended validation design? Decide before Phase 6, since it shapes the fast-path stratum.
 
 ## Next
-- retrieval.py. Typed by me. Candidate dataclass, retrieve() returns list, format_candidates() separate. Scoring unchanged from cell 6: five terms, not three.
+- retrieval.py verified. Commit, then Claude reviews the diff.
+- Then classify.py: drill first. Candidate dataclass, retrieve() returns list, format_candidates() separate. Scoring unchanged from cell 6: five terms, not three.
 - Verification must include the three cases where cell 6 returns "": empty title, only stopwords, no row scoring above 0. format_candidates([]) has to return "" too, not the header line.
