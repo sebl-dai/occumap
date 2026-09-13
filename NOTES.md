@@ -33,8 +33,11 @@
 - pyproject.toml: hatchling, src layout, runtime and dev deps split. Editable install works.
 - config checked: MODEL, PROMPT_VERSION, CONFIDENCE_THRESHOLD, MAJORITY_VOTE_RUNS match cell 2. BATCH_SIZE matches cell 9. TOP_N_CANDIDATES matches cell 6 default top_n=15.
 - loaders verified: 297 titles, 1006 five-digit codes. Split distribution RNF 395, PME 390, T 216, NA 5 (the five are X-codes, legitimate).
-- normalise verified on four cases: whitespace collapse, override before driver rule, short string, None.
+- normalise verified on four cases, labels only: whitespace collapse, override before driver rule, short string, None. None title mismatches the notebook (see Phase 1 parity breaks).
 - retrieval.py: drill, code, explain done 14 Sep. Verified: format_candidates(retrieve(t, load_ssoc(), 15)) == notebook get_ssoc_candidates(t) on six named cases (SOFTWARE ENGINEER, ASST MGR SALES, ART TEACHER, empty, SENIOR ASSISTANT, ZZQX) and on all 297 synthetic titles, raw and cleaned. load_ssoc() frame equals notebook ssoc_5digit. Claude wrote and ran the check at my request, an exception to "I run the verification".
+
+## Phase 1 parity breaks, fix before pipeline
+- normalise: introduced in extraction, not a notebook bug. Cell 4 checks `pd.isna`; normalise.py checks `is None`. NaN and pd.NA return `('nan', None)` instead of `(nan, 'NA')`, so they reach the LLM. None and blank strings return `''` instead of the original input. The synthetic run can't catch it (0 blank titles); needs a targeted check.
 
 ## Known bugs, logged not fixed
 All fixed in Phase 2 with a test that captures them, unless stated otherwise.
