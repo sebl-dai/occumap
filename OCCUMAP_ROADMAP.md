@@ -1,6 +1,6 @@
 # OccuMap: Notebook to Production
 ### Build-and-learn roadmap, July 2026 onward
-### Updated 13 September 2026
+### Updated 14 September 2026
  
 ## Why this exists
  
@@ -44,7 +44,7 @@ Findings worth keeping:
  
 **The interview line this kills:** "your code lives in notebooks." Confirmed twice more in September: Airwallex and Mastercard both rejected at automated screen on the engineering half of the profile.
  
-### Status, 13 September
+### Status, 14 September
  
 | Module | State | Notes |
 |---|---|---|
@@ -52,11 +52,11 @@ Findings worth keeping:
 | `normalise.py` | Done, pasted | Pure. Carries the `ns man` substring bug (see Known bugs). |
 | `loaders.py` | Done, pasted | 297 titles, 1006 five-digit codes. `DATA_DIR` resolves relative to source; breaks in a container. Warnings unsuppressed. No column validation. |
 | `retrieval.py` | Next | Typed by Sebastian. Design below. |
-| `classify.py` | Empty | Cell 7 first half: prompt assembly, single API call, response parsing. |
+| `classify.py` | Empty | Cell 7 first half plus `major_group_context` from cell 6: prompt assembly, single API call, response parsing, parallel calls over `n_runs`, fallback result when every call fails. |
 | `voting.py` | Empty | Cell 7 second half: `Counter`, winner, accept rule. Pure. |
-| `pipeline.py` | Empty | Cell 9. Batch loop. Fix double `preprocess()` call here. |
+| `pipeline.py` | Empty | Cell 4 apply, cell 9 batch loop, cell 10 results CSV write. |
 | `reconcile.py` | Empty | Cell 13. Merge human review with auto-accepted. |
-| `cli.py` | Empty | New. `occumap classify "ASST MGR SALES"`. |
+| `cli.py` | Empty | New. The one addition Phase 1 allows. `occumap classify "ASST MGR SALES"`. |
  
 `pyproject.toml` exists with hatchling, src layout, runtime and dev dependency split. Editable install works. `CLAUDE.md` is in the repo.
  
@@ -70,19 +70,15 @@ Split it:
 - `format_candidates(candidates) -> str`. Pure. Builds the prompt block.
 - `Candidate` is a frozen dataclass: `ssoc_code`, `title`, `split`, `score`.
 - `ssoc` is a parameter, not a global. `k` is a parameter with `TOP_N_CANDIDATES` as default.
-- Scoring logic unchanged. Same phrase match, example match, word overlap. Same `.apply` across all rows. Slow, but Phase 1 is shape, not speed.
+- Scoring logic unchanged. Same five terms: phrase match (10), example phrase (8), word overlap (2 per word), example word (2 per word), definition word (1 per word). Same `score > 0` filter and `nlargest`. Same `.apply` across all rows. Slow, but Phase 1 is shape, not speed.
 ### Known bugs, logged not fixed
  
-- `NA_KEYWORDS` uses substring matching. `'ns man'` matches "Operations Manager", "Communications Manager", "Admissions Manager", "Relations Manager". `'nil'` matches "Manila" and "Vanilla". Every "-ions Manager" title has been fast-pathed to NA since the notebook was written. Fix in Phase 2 with word-boundary matching and a test that captures those four titles.
-- `except Exception: return None` in the API call swallows rate limits, malformed JSON and network drops identically. Ruff flags it as BLE001.
-- `single_api_call(title, prompt)` never uses `title`.
-- `preprocess()` runs twice per row in cell 4.
-- Scoring runs `.apply(score, axis=1)` across ~1000 rows per title.
+Kept in NOTES.md, the single list. Not repeated here so the two cannot drift.
 ### Remaining steps
  
 1. Retrieval, typed, verified against cell 6 on three titles.
 2. Classify and voting, typed, verified.
-3. Pipeline and reconcile, typed. Fix the double preprocess here since it is a call-site change, not a behaviour change.
+3. Pipeline and reconcile, typed. The double `preprocess()` call is kept as is; it is fixed in Phase 2.
 4. CLI.
 5. Parity check: run the package over `synthetic_titles.csv`, diff against `synthetic_results.csv`. Same output or find why.
 6. Archive the notebook into `notebooks/legacy/`.
@@ -103,12 +99,14 @@ Split it:
 2. Stratified sampling: choosing the strata (fast-path versus LLM, confidence band, split label) and seeing what it costs.
 3. Wilson intervals, computed by hand next to the normal approximation, watching them diverge at n=60.
 4. Recall at k: for each gold title, is the true code in the top k. Swept across k in {5, 10, 15, 25}. This answers whether 15 was a guess.
-5. TF-IDF: swap the hand-rolled lexical scorer for sklearn's `TfidfVectorizer`, measure recall at k, see which terms IDF downweights.
+5. TF-IDF: build sklearn's `TfidfVectorizer` as a separate retriever next to the frozen lexical scorer, measure recall at k for both, see which terms IDF downweights.
 6. Hybrid retrieval: add a dense retriever (sentence-transformers, FAISS index), fuse with reciprocal rank fusion, measure lexical versus dense versus hybrid. This is what Cortex Search does underneath.
 7. Lift measurement: split the gold set, treat one half as control, compute lift and its interval. Synthetic, but the arithmetic is an A/B test.
 **Tooling:** MLflow for experiment tracking, since prompt version against recall at k is exactly what it is for and it is named in Shell's and Chanel's JDs.
  
-**Key decision:** stratification scheme for the 60 titles.
+**Key decision:** stratification scheme for the 60 titles. Depends on the open question in NOTES.md: the rule-based fast path does not skip the LLM today.
+
+**Baseline, decided 14 September:** Phase 6 measures the pipeline with its known bugs unfixed, on purpose. Those numbers are the before; Phase 2 fixes are measured against them. The Phase 1 lexical scorer is frozen as the retrieval baseline. TF-IDF and dense retrievers go in separate modules and are compared against it, not swapped in.
  
 **Exit criteria:** gold set labelled and frozen; eval script runs against the pipeline; results table with intervals in the README; recall at k curve; error analysis names the failure patterns; closeout ritual.
  
@@ -122,11 +120,11 @@ Split it:
  
 **Concepts:** unit versus integration; arrange-act-assert; fixtures; mocking external services; coverage as signal; how untestable code reveals design flaws from Phase 1; TDD as a gate (write the failing test, prove it fails, then implement).
  
-**Fixes that land here, each with a test that captures the bug first:** word-boundary keyword matching; `get_client()` instead of client-at-import; `DATA_DIR` from an env var with the current path as fallback; suppressed openpyxl warnings; a column assertion after load; typed exceptions instead of blind `except`.
+**Fixes that land here, each with a test that captures the bug first:** word-boundary keyword matching; `get_client()` instead of client-at-import; `DATA_DIR` from an env var with the current path as fallback; suppressed openpyxl warnings; a column assertion after load; typed exceptions instead of blind `except` (cells 7 and 9); one `preprocess()` call per row instead of two; resolve the unused `title` parameter in the API call.
  
 **Tooling:** Ruff for lint. A pre-commit hook that runs pytest and ruff and blocks on failure. This is the first control, as opposed to policy, in the repo.
  
-**Exit criteria:** `pytest` green; API fully mocked; normalise, voting and retrieval each have meaningful cases including the four "-ions Manager" titles; hook installed; closeout ritual.
+**Exit criteria:** `pytest` green; API fully mocked; normalise, voting and retrieval each have meaningful cases including the four "-ions Manager" titles plus Manila and Vanilla; hook installed; closeout ritual.
  
 **Estimated effort:** one to two sessions.
  

@@ -22,11 +22,13 @@ and understand it. Not that it gets built.
 
 ## Phase 1 rules
 - Same behaviour as occumap.ipynb. No fixes, no improvements, no new features.
-- Extraction order: config, loaders, normalise, retrieval, classify, voting,
+  One exception: cli.py, a terminal entry point the notebook never had.
+- Extraction order: config, normalise, loaders, retrieval, classify, voting,
   pipeline, reconcile, cli. Dependencies only point backwards.
 - Each module is verified against the notebook before the next starts.
 - Known bugs are logged in NOTES.md, not fixed. They get fixed in Phase 2 with
-  a test that captures them.
+  a test that captures them. NOTES.md is the only bug list; the roadmap
+  points to it.
 - Phase 6 follows Phase 1. Not Phase 2.
 
 ## Standards
