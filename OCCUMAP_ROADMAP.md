@@ -70,7 +70,7 @@ Split it:
 - `format_candidates(candidates) -> str`. Pure. Builds the prompt block.
 - `Candidate` is a frozen dataclass: `ssoc_code`, `title`, `split`, `score` (float).
 - `ssoc` is a parameter, not a global. `k` is a parameter with no default, so retrieval.py never imports config; the caller passes `TOP_N_CANDIDATES`.
-- Scoring logic unchanged. Same five terms: phrase match (10), example phrase (8), word overlap (2 per word), example word (2 per word), definition word (1 per word). Same `score > 0` filter and `nlargest`. Same `.apply` across all rows. Slow, but Phase 1 is shape, not speed.
+- Scoring logic unchanged. Same five terms: phrase match (10), example phrase (8), word overlap (2 per word), example word (2 per word), definition word (1 per word). Same `score > 0` filter and `nlargest`. Scoring lives in a module-level `_score_row` so a single row can be tested without running `retrieve`. Same `.apply` across all rows. Slow, but Phase 1 is shape, not speed.
 ### Known bugs, logged not fixed
  
 Kept in NOTES.md, the single list. Not repeated here so the two cannot drift.
@@ -120,7 +120,7 @@ Kept in NOTES.md, the single list. Not repeated here so the two cannot drift.
  
 **Concepts:** unit versus integration; arrange-act-assert; fixtures; mocking external services; coverage as signal; how untestable code reveals design flaws from Phase 1; TDD as a gate (write the failing test, prove it fails, then implement).
  
-**Fixes that land here, each with a test that captures the bug first:** word-boundary keyword matching; `get_client()` instead of client-at-import; `DATA_DIR` from an env var with the current path as fallback; suppressed openpyxl warnings; a column assertion after load; typed exceptions instead of blind `except` (cells 7 and 9); one `preprocess()` call per row instead of two; resolve the unused `title` parameter in the API call.
+**Fixes that land here:** every entry under Known bugs in NOTES.md, each with a test that captures the bug first. Not listed here so the two cannot drift.
  
 **Tooling:** Ruff for lint. A pre-commit hook that runs pytest and ruff and blocks on failure. This is the first control, as opposed to policy, in the repo.
  

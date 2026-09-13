@@ -22,6 +22,22 @@ class Candidate:
     score: float
 
 
+def _score_row(row: pd.Series, title_clean: str, content_words: set[str]) -> int:
+    """Score one SSOC row against a cleaned title. Same five terms as notebook cell 6."""
+    ssoc_title = str(row["title"]).lower()
+    ssoc_words = set(ssoc_title.split()) - STOPWORDS
+    examples = str(row.get("examples_here", "")).lower()
+    definition = str(row.get("definition", "")).lower()
+
+    phrase_match = 10 if title_clean in ssoc_title else 0
+    example_phrase = 8 if title_clean in examples else 0
+    word_overlap = len(content_words & ssoc_words) * 2
+    example_word = sum(2 for word in content_words if word in examples)
+    definition_word = sum(1 for word in content_words if word in definition)
+
+    return phrase_match + example_phrase + word_overlap + example_word + definition_word
+
+
 def retrieve(title: str | None, ssoc: pd.DataFrame, k: int) -> list[Candidate]:
     """Rank SSOC rows against a title by word match and return the top k.
 
@@ -37,22 +53,10 @@ def retrieve(title: str | None, ssoc: pd.DataFrame, k: int) -> list[Candidate]:
     if not content_words:
         return []
 
-    def score(row: pd.Series) -> int:
-        ssoc_title = str(row["title"]).lower()
-        ssoc_words = set(ssoc_title.split()) - STOPWORDS
-        examples = str(row.get("examples_here", "")).lower()
-        definition = str(row.get("definition", "")).lower()
-
-        phrase_match = 10 if title_clean in ssoc_title else 0
-        example_phrase = 8 if title_clean in examples else 0
-        word_overlap = len(content_words & ssoc_words) * 2
-        example_word = sum(2 for word in content_words if word in examples)
-        definition_word = sum(1 for word in content_words if word in definition)
-
-        return phrase_match + example_phrase + word_overlap + example_word + definition_word
-
     scored = ssoc.copy()
-    scored["score"] = scored.apply(score, axis=1)
+    scored["score"] = scored.apply(
+        lambda row: _score_row(row, title_clean, content_words), axis=1
+    )
     top = scored[scored["score"] > 0].nlargest(k, "score")
 
     return [

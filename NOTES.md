@@ -23,7 +23,9 @@
 - Retrieval design locked. Candidate(ssoc_code: str, title: str, split: str, score: float), frozen. retrieve(title: str | None, ssoc: pd.DataFrame, k: int) -> list[Candidate]. format_candidates(candidates: list[Candidate]) -> str.
   - Design, drilled until the why was right: retrieve and format split, so candidates stay data (recall at k measurable, other retrievers plug into the same formatter). Lexical now, semantic in Phase 6 against this baseline.
   - Design, defined by me: frozen dataclass; ssoc as a parameter; k with no default, so retrieval.py never imports config and needs no API key; empty results as [] and "" (matches notebook).
-  - Preferences, recorded: score as float, stopwords in retrieval.py, scoring nested inside retrieve, title typed str | None.
+  - Design, relabelled after external review: scoring lifted to module-level _score_row(row, title_clean, content_words). A closure inside retrieve cannot be called from a test; Phase 2 needs to score one handcrafted row without running retrieve. Shape change only, results unchanged.
+  - Preferences, recorded: score as float, stopwords in retrieval.py, title typed str | None.
+- Learned: "I don't think testing it is necessary" is a claim about design, not a preference. If a choice decides what can be tested later, it is design.
 - Lexical vs semantic: build lexical exactly as cell 6. Semantic is Phase 6, measured against this baseline. New dependencies (sklearn, sentence-transformers, torch, FAISS, MLflow) get asked about when Phase 6 needs them.
 
 ## Phase 1, done so far
@@ -42,14 +44,14 @@ All fixed in Phase 2 with a test that captures them, unless stated otherwise.
 - loaders: openpyxl warnings not suppressed. Notebook cell 1 did this.
 - loaders: no column validation after read_excel. If SingStat shifts header=4, columns misname silently.
 - cell 4: preprocess() called twice per row.
-- cell 6: NaN title passes the `not title` guard (NaN is truthy), becomes the word "nan", and substring-matches "finance", "maintenance". 0 of 297 synthetic titles are blank, so current results are unaffected. A CLI call could hit it.
-- cell 6: scoring runs .apply(score, axis=1) across ~1000 rows per title. Not fixed in the lexical scorer, which stays frozen as the Phase 6 baseline. The Phase 6 TF-IDF retriever is the replacement.
+- cell 6: NaN title passes the `not title` guard (NaN is truthy), becomes the word "nan", and substring-matches "finance", "maintenance". 0 of 297 synthetic titles are blank, so current results are unaffected. Only reachable through pandas: a blank cell in a CSV read by pipeline. A CLI or API call passes a string, and an empty string is caught by the guard. Source is cell 4: preprocess returns a missing title unchanged as NaN. Phase 2 fix, decided 14 Sep: preprocess returns "" for a missing title, so retrieve, the prompt and every later retriever get a real empty string. Empty titles skip the LLM entirely, no 3 API calls to get back NA.
+- cell 6: scoring runs .apply(score, axis=1) across ~1000 rows per title. Not fixed in the lexical scorer, which stays frozen as the Phase 6 baseline. The Phase 6 TF-IDF retriever is the replacement. retrieve also copies the full 1006-row frame per title so the score column never lands on the caller's frame; scoring into a separate Series would drop the copy with identical results.
 - cell 7: except Exception: return None swallows everything. Ruff BLE001.
 - cell 7: single_api_call(title, prompt) never uses title.
 - cell 9: except Exception as e: print(...) in the batch loop swallows row failures. Same class as cell 7.
 
 ## Open questions
-- Fast path never skips the LLM. Cell 9 process_row calls classify_title on every row, including rows preprocess already labelled. The rule label only feeds AGREE/DISAGREE. Cell 0 says the rules fast-path obvious cases before the LLM. Bug or intended validation design? Decide before Phase 6, since it shapes the fast-path stratum.
+- Fast path never skips the LLM. Cell 9 process_row calls classify_title on every row, including rows preprocess already labelled. The rule label only feeds AGREE/DISAGREE. Cell 0 says the rules fast-path obvious cases before the LLM. Bug or intended validation design? Decide before Phase 6, since it shapes the fast-path stratum. Decided 14 Sep for empty titles only: they skip the LLM from Phase 2. Other fast-path rows still open.
 
 ## Next
 - External review of the retrieval commits and this workflow, in a separate Claude chat.
