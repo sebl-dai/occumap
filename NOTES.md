@@ -18,11 +18,12 @@
 - Cell numbers in all docs are 0-indexed (cell 0 is the title markdown).
 - Extraction order corrected to what happened: config, normalise, loaders.
 - Build protocol changed in CLAUDE.md: drill, code, explain, per module, in order. Claude writes bodies after the drill passes. Config, normalise and loaders get the drill retroactively before Phase 1 closes.
-- Retrieval drill done across this session. Design locked:
-  - Candidate(ssoc_code: str, title: str, split: str, score: float), frozen.
-  - retrieve(title: str | None, ssoc: pd.DataFrame, k: int) -> list[Candidate]. k has no default, so retrieval.py does not import config. Caller passes TOP_N_CANDIDATES.
-  - format_candidates(candidates: list[Candidate]) -> str.
-  - Stopwords as a constant in retrieval.py. Scoring nested inside retrieve.
+- Drill refined: design decisions (choosing otherwise breaks something) get questioned until the why is right. Preferences get recorded, not probed. Decisions I already defined are accepted; I ask if I want deeper.
+- Diff review happens outside Claude Code, in VS Code.
+- Retrieval design locked. Candidate(ssoc_code: str, title: str, split: str, score: float), frozen. retrieve(title: str | None, ssoc: pd.DataFrame, k: int) -> list[Candidate]. format_candidates(candidates: list[Candidate]) -> str.
+  - Design, drilled until the why was right: retrieve and format split, so candidates stay data (recall at k measurable, other retrievers plug into the same formatter). Lexical now, semantic in Phase 6 against this baseline.
+  - Design, defined by me: frozen dataclass; ssoc as a parameter; k with no default, so retrieval.py never imports config and needs no API key; empty results as [] and "" (matches notebook).
+  - Preferences, recorded: score as float, stopwords in retrieval.py, scoring nested inside retrieve, title typed str | None.
 - Lexical vs semantic: build lexical exactly as cell 6. Semantic is Phase 6, measured against this baseline. New dependencies (sklearn, sentence-transformers, torch, FAISS, MLflow) get asked about when Phase 6 needs them.
 
 ## Phase 1, done so far
@@ -51,6 +52,5 @@ All fixed in Phase 2 with a test that captures them, unless stated otherwise.
 - Fast path never skips the LLM. Cell 9 process_row calls classify_title on every row, including rows preprocess already labelled. The rule label only feeds AGREE/DISAGREE. Cell 0 says the rules fast-path obvious cases before the LLM. Bug or intended validation design? Decide before Phase 6, since it shapes the fast-path stratum.
 
 ## Next
-- retrieval.py verified. Commit, then Claude reviews the diff.
-- Then classify.py: drill first. Candidate dataclass, retrieve() returns list, format_candidates() separate. Scoring unchanged from cell 6: five terms, not three.
-- Verification must include the three cases where cell 6 returns "": empty title, only stopwords, no row scoring above 0. format_candidates([]) has to return "" too, not the header line.
+- External review of the retrieval commits and this workflow, in VS Code.
+- Then classify.py: drill first.

@@ -13,11 +13,15 @@ and understand it. Not that it gets built.
 ## How we build, Phase 1
 Three steps per module, in order. Do not skip or merge them.
 
-1. Drill. I describe what the module does and why in my own words. You probe three deep on every design decision: why this split, why this type, why a parameter and not a global, what breaks if we choose otherwise. If I can't defend a decision, we stay on it. No code until the drill is done.
+1. Drill. I describe what the module does and why in my own words. You list the decisions in the module and label each one. I can relabel any of them.
+   - Design: choosing otherwise breaks something later (measurement, testing, imports, parity with the notebook). You ask me why: why this split, why this type, why a parameter and not a global, what breaks if we choose otherwise. If my answer is wrong or incomplete, keep questioning until I get it right.
+   - Preference: either choice works. You state the trade-off in one line and record my pick. No probing.
+   - If I already defined a decision and its why, accept it. If I want to go deeper, I ask.
+   No code until every design decision has its why.
 2. Code. You write the module body. Confirmed signatures, behaviour matched to the notebook cell, nothing more.
 3. Explain. You walk the body as pseudocode, block by block, and map each block to the decision from step 1 it implements. Then I restate the module's purpose and one trade-off without looking. If I can't, back to step 1.
 
-Then: I run the verification. When it breaks, you explain the error and I say what to change before you change it. After commit, you review the diff as a colleague who didn't write it.
+Then: I run the verification. When it breaks, you explain the error and I say what to change before you change it. After commit, the diff is reviewed outside Claude Code, in VS Code.
 
 Config, normalise and loaders skipped step 1. Before Phase 1 closes, each gets the drill retroactively.
 
@@ -47,7 +51,8 @@ Config, normalise and loaders skipped step 1. Before Phase 1 closes, each gets t
 ## Do not
 - Refactor beyond the current module.
 - Add dependencies without asking.
-- Explain a concept after writing the code. Concept first, then code.
+- Introduce a concept for the first time after writing the code. Concepts land
+  in the drill; step 3 only maps the code back to them.
 - Write a module body before the drill is done. Once it is, Claude Code writes
   the body.
 
