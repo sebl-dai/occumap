@@ -21,7 +21,7 @@ Three steps per module, in order. Do not skip or merge them.
 2. Code. You write the module body. Confirmed signatures, behaviour matched to the notebook cell, nothing more.
 3. Explain. You walk the body as pseudocode, block by block, and map each block to the decision from step 1 it implements. Then I restate the module's purpose and one trade-off without looking. If I can't, back to step 1.
 
-Then: I run the verification. When it breaks, you explain the error and I say what to change before you change it. After commit, the diff is reviewed outside Claude Code, in VS Code.
+Then: I run the verification. When it breaks, you explain the error and I say what to change before you change it. After commit, the diff is reviewed in a separate Claude chat, outside Claude Code.
 
 Config, normalise and loaders skipped step 1. Before Phase 1 closes, each gets the drill retroactively.
 

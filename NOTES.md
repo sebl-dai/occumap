@@ -19,7 +19,7 @@
 - Extraction order corrected to what happened: config, normalise, loaders.
 - Build protocol changed in CLAUDE.md: drill, code, explain, per module, in order. Claude writes bodies after the drill passes. Config, normalise and loaders get the drill retroactively before Phase 1 closes.
 - Drill refined: design decisions (choosing otherwise breaks something) get questioned until the why is right. Preferences get recorded, not probed. Decisions I already defined are accepted; I ask if I want deeper.
-- Diff review happens outside Claude Code, in VS Code.
+- Diff review happens in a separate Claude chat, outside Claude Code.
 - Retrieval design locked. Candidate(ssoc_code: str, title: str, split: str, score: float), frozen. retrieve(title: str | None, ssoc: pd.DataFrame, k: int) -> list[Candidate]. format_candidates(candidates: list[Candidate]) -> str.
   - Design, drilled until the why was right: retrieve and format split, so candidates stay data (recall at k measurable, other retrievers plug into the same formatter). Lexical now, semantic in Phase 6 against this baseline.
   - Design, defined by me: frozen dataclass; ssoc as a parameter; k with no default, so retrieval.py never imports config and needs no API key; empty results as [] and "" (matches notebook).
@@ -52,5 +52,5 @@ All fixed in Phase 2 with a test that captures them, unless stated otherwise.
 - Fast path never skips the LLM. Cell 9 process_row calls classify_title on every row, including rows preprocess already labelled. The rule label only feeds AGREE/DISAGREE. Cell 0 says the rules fast-path obvious cases before the LLM. Bug or intended validation design? Decide before Phase 6, since it shapes the fast-path stratum.
 
 ## Next
-- External review of the retrieval commits and this workflow, in VS Code.
+- External review of the retrieval commits and this workflow, in a separate Claude chat.
 - Then classify.py: drill first.
