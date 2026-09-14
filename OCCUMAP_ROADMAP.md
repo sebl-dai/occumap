@@ -6,79 +6,59 @@
  
 One project taken to full depth. OccuMap goes from "Streamlit app on GitHub" to a tested, containerised, served, CI/CD'd classification system with a measured evaluation harness, and later a fine-tuned encoder compared against it. Every phase closes a gap named in an actual interview or JD. Every phase teaches the concepts underneath it, in context, before the code is written.
  
-The end state is a single repo you can walk through layer by layer because you built every layer yourself. That is the interview fix. Not skeletons compressing studied knowledge, but fluency from execution.
+The end state is a single repo you can walk through layer by layer, because you know what each layer does, why it is shaped that way, and what you decided along the way. That is the interview fix. Not skeletons compressing studied knowledge, but fluency from having made every decision.
  
 ## How this document works
  
 Detail decays with distance. The current phase is fully detailed. Later phases are specified at the level of outcome, concepts, key decisions and exit criteria. At each phase closeout, the next one gets detailed, informed by what the last one taught. Categories are locked. Steps are earned.
  
-## Rules of engagement
+## Phase rules
  
-1. **Concept before code.** Every step gets its what and why before implementation. If code arrives without the concept, stop.
-2. **Drill, code, explain.** From retrieval onward, each module runs three steps in order. Drill: Sebastian describes the module. The agent labels each decision as design or preference, questions design decisions until Sebastian has the why right, and records preferences without probing. Decisions Sebastian already defined are accepted unless Sebastian asks to go deeper. Code: the agent writes the body to the confirmed signatures, matched to the notebook. Explain: the agent walks the body as pseudocode mapped to the drill's decisions, then Sebastian restates the purpose and one trade-off without looking. Sebastian runs verification; the agent explains errors and changes code only after Sebastian says what to change. Config, normalise and loaders were pasted and are flagged as such; they get re-read until they can be defended three deep.
-3. **No phase skipping.** Exit criteria pass before the next phase opens.
-4. **Closeout ritual.** A phase ends with (a) exit criteria demonstrated, (b) README updated, (c) NOTES.md updated with what was learned, (d) this roadmap re-read and struck where the work disproved it.
-5. **Session cadence.** Sessions happen when they happen. A skipped session shifts the plan; it does not break it. No weekday versus weekend rule.
-6. **Honest framing.** Anything designed but not executed is labelled as such, everywhere, always. The repo's credibility is the whole point.
-7. **Two instances.** Claude Code in VS Code builds alongside, governed by CLAUDE.md. A separate chat reviews what gets pushed and holds the plan across sessions.
+How each session and each module is built: CLAUDE.md. These rules govern phases.
+
+1. **No phase skipping.** Exit criteria pass before the next phase opens.
+2. **Closeout ritual.** A phase ends with (a) exit criteria demonstrated, (b) README updated, (c) NOTES.md updated with what was learned, (d) this roadmap re-read: struck where the work disproved it, re-detailed where it taught something, and the next phase confirmed as still deserving its place.
+3. **Session cadence.** Sessions happen when they happen. A skipped session shifts the plan; it does not break it. No weekday versus weekend rule.
 ## Execution order
  
-Phases keep their numbers. The order they run in changed on 4 September:
+Phases keep their numbers. The order they run in changed on 14 September:
  
-**0, 1, 6, 2, 3, 4, 5, then 7 and 8 in 2027.**
+**1, 3, 4, 5, 6, 2, then 7 and 8 in 2027.**
  
-Phase 6 moved to second because evaluation is the differentiator on every AI engineer JD reviewed this month, and because it is where five named knowledge gaps get built rather than studied. Phases 2 through 5 are the deployment gate and follow it.
+Phases 3, 4 and 5 run first because FastAPI, Docker and CI/CD are the words that fail automated screens. Evaluation (6) and testing (2) follow.
  
 ## Phase 0: Readiness. Done 31 August.
  
-Findings worth keeping:
- 
-- Repo lives at `~/Downloads/Repositories/occumap`. The Dropbox copy under `NTUC Employment 2024/PulseProject` no longer exists. GitHub is the source of truth.
-- API key was a placeholder from 24 July to 31 August. Live now. Never entered git history (verified from a fresh clone).
-- There was no terminal entry point. The pipeline lived entirely in `occumap.ipynb`. That is the baseline, and the reason Phase 1 is a refactor.
-- `*.xlsx` was blanket-ignored, so the SSOC definitions file was never committed and the repo could not run from a fresh clone. Fixed with a negation rule.
-- Docker Desktop: not yet installed. Do it before Phase 4 opens.
+Findings: NOTES.md, 31 Aug.
 ## Phase 1: Refactor (notebook to package). In progress.
  
 **Outcome:** OccuMap becomes an installable Python package with a `src/` layout, runnable from the terminal, importable from anywhere. The notebook is archived, not deleted.
  
 **The interview line this kills:** "your code lives in notebooks." Confirmed twice more in September: Airwallex and Mastercard both rejected at automated screen on the engineering half of the profile.
  
-### Status, 14 September
+### Module plan
  
-| Module | State | Notes |
-|---|---|---|
-| `config.py` | Done, pasted | `client` constructed at import. Fix in Phase 2: `get_client()`. |
-| `normalise.py` | Done, pasted | Pure. Carries the `ns man` substring bug (see Known bugs). |
-| `loaders.py` | Done, pasted | 297 titles, 1006 five-digit codes. `DATA_DIR` resolves relative to source; breaks in a container. Warnings unsuppressed. No column validation. |
-| `retrieval.py` | Done | Drill, code, explain 14 September. Body written by Claude Code. Matches cell 6 on all 297 synthetic titles. Design below. |
-| `classify.py` | Empty | Cell 7 first half plus `major_group_context` from cell 6: prompt assembly, single API call, response parsing, parallel calls over `n_runs`, fallback result when every call fails. |
-| `voting.py` | Empty | Cell 7 second half: `Counter`, winner, accept rule. Pure. |
-| `pipeline.py` | Empty | Cell 4 apply, cell 9 batch loop, cell 10 results CSV write. |
-| `reconcile.py` | Empty | Cell 13. Merge human review with auto-accepted. |
-| `cli.py` | Empty | New. The one addition Phase 1 allows. `occumap classify "ASST MGR SALES"`. |
+Extraction order is the table order. Status and verification: NOTES.md.
  
-`pyproject.toml` exists with hatchling, src layout, runtime and dev dependency split. Editable install works. `CLAUDE.md` is in the repo.
+| Module | From the notebook |
+|---|---|
+| `config.py` | Cells 1 and 2: constants and client. `BATCH_SIZE` from cell 9, `TOP_N_CANDIDATES` from cell 6. |
+| `normalise.py` | Cell 4: `preprocess` and its keyword lists. |
+| `loaders.py` | Cell 3 titles CSV, cell 5 SSOC load. |
+| `retrieval.py` | Cell 6 `get_ssoc_candidates`, split into `retrieve` and `format_candidates`. Design and its why: NOTES.md, 14 Sep. |
+| `classify.py` | Cell 7 first half plus `major_group_context` from cell 6: prompt assembly, single API call, response parsing, parallel calls over `n_runs`, fallback result when every call fails. |
+| `voting.py` | Cell 7 second half: `Counter`, winner, accept rule. Pure. |
+| `pipeline.py` | Cell 4 apply, cell 9 batch loop, cell 10 results CSV write. |
+| `reconcile.py` | Cell 13. Merge human review with auto-accepted. |
+| `cli.py` | New, no notebook equivalent. `occumap classify "ASST MGR SALES"`. |
  
-### Retrieval design (the one real decision in Phase 1)
+### Steps
  
-Cell 6's `get_ssoc_candidates` scores every SSOC row, takes the top 15, and returns a formatted prompt string. By the time it returns, the candidate list no longer exists as data. That is why recall at k is unmeasurable today.
+Each module runs the build protocol in CLAUDE.md. Progress: NOTES.md.
  
-Split it:
- 
-- `retrieve(title, ssoc, k) -> list[Candidate]`. Pure. Scores and ranks. Returns structured results including the score.
-- `format_candidates(candidates) -> str`. Pure. Builds the prompt block.
-- `Candidate` is a frozen dataclass: `ssoc_code`, `title`, `split`, `score` (float).
-- `ssoc` is a parameter, not a global. `k` is a parameter with no default, so retrieval.py never imports config; the caller passes `TOP_N_CANDIDATES`.
-- Scoring logic unchanged. Same five terms: phrase match (10), example phrase (8), word overlap (2 per word), example word (2 per word), definition word (1 per word). Same `score > 0` filter and `nlargest`. Scoring lives in a module-level `_score_row` so a single row can be tested without running `retrieve`. Same `.apply` across all rows. Slow, but Phase 1 is shape, not speed.
-### Known bugs, logged not fixed
- 
-Kept in NOTES.md, the single list. Not repeated here so the two cannot drift.
-### Remaining steps
- 
-1. Retrieval: done 14 September. Verified against cell 6 on six named cases and all 297 synthetic titles.
-2. Classify and voting: drill, code, explain, verified.
-3. Pipeline and reconcile: drill, code, explain. The double `preprocess()` call is kept as is; it is fixed in Phase 2.
+1. Retrieval.
+2. Classify and voting.
+3. Pipeline and reconcile.
 4. CLI.
 5. Parity check: run the package over `synthetic_titles.csv`, diff against `synthetic_results.csv`. Same output or find why.
 6. Archive the notebook into `notebooks/legacy/`.
@@ -87,7 +67,7 @@ Kept in NOTES.md, the single list. Not repeated here so the two cannot drift.
  
 **Estimated remaining effort:** two sessions.
  
-## Phase 6: Evaluate. Runs second.
+## Phase 6: Evaluate. Runs after Phase 5.
  
 **Outcome:** the eval harness scoped in April, executed. A 60-title gold set, self-labelled against SSOC definitions with methodology documented, an eval script, and numbers with intervals in the README.
  
@@ -104,7 +84,7 @@ Kept in NOTES.md, the single list. Not repeated here so the two cannot drift.
 7. Lift measurement: split the gold set, treat one half as control, compute lift and its interval. Synthetic, but the arithmetic is an A/B test.
 **Tooling:** MLflow for experiment tracking, since prompt version against recall at k is exactly what it is for and it is named in Shell's and Chanel's JDs.
  
-**Key decision:** stratification scheme for the 60 titles. Depends on the open question in NOTES.md: the rule-based fast path does not skip the LLM today.
+**Key decision:** stratification scheme for the 60 titles. Depends on the fast-path open question in NOTES.md.
 
 **Baseline, decided 14 September:** Phase 6 measures the pipeline with its known bugs unfixed, on purpose. Those numbers are the before; Phase 2 fixes are measured against them. The Phase 1 lexical scorer is frozen as the retrieval baseline. TF-IDF and dense retrievers go in separate modules and are compared against it, not swapped in.
  
@@ -124,7 +104,7 @@ Kept in NOTES.md, the single list. Not repeated here so the two cannot drift.
  
 **Tooling:** Ruff for lint. A pre-commit hook that runs pytest and ruff and blocks on failure. This is the first control, as opposed to policy, in the repo.
  
-**Exit criteria:** `pytest` green; API fully mocked; normalise, voting and retrieval each have meaningful cases including the four "-ions Manager" titles plus Manila and Vanilla; hook installed; closeout ritual.
+**Exit criteria:** `pytest` green; API fully mocked; normalise, voting and retrieval each have meaningful cases; every fix above has its test; hook installed; closeout ritual.
  
 **Estimated effort:** one to two sessions.
  
@@ -149,16 +129,20 @@ Kept in NOTES.md, the single list. Not repeated here so the two cannot drift.
 **Outcome:** one `Dockerfile`; `docker build` then `docker run` yields the working API on any machine.
  
 **Kills:** Docker, the top-priority named gap across every JD tally.
+
+**Before it opens:** install Docker Desktop.
+
+**Required fix:** `DATA_DIR` from an environment variable, with the current path as fallback (known bug in NOTES.md). Its test lands in Phase 2.
  
 **Concepts:** image versus container; layers and caching; Dockerfile anatomy; `.dockerignore`; secrets via environment at runtime; port mapping; slim base images; non-root user.
  
-**Exit criteria:** fresh `docker build` succeeds; container serves the API from the host; image contains no secrets; closeout ritual.
+**Exit criteria:** fresh `docker build` succeeds; `DATA_DIR` fix in place; container serves the API from the host; image contains no secrets; closeout ritual.
  
 **Estimated effort:** one session.
  
 ## Phase 5: Automate and deploy
  
-**Outcome:** GitHub Actions runs tests and builds the image on every push; the container deploys; a public URL exists.
+**Outcome:** GitHub Actions runs ruff and a one-title smoke test, and builds the image, on every push; the container deploys; a public URL exists. The smoke test stands in until Phase 2's pytest suite replaces it.
  
 **Change, 5 September:** deploy target is Azure Container Apps, not Cloud Run. Azure is what Singapore enterprises run and it is named in Shell's and Chanel's JDs. Cloud Run remains a fallback if Azure's free tier proves awkward.
  
@@ -168,10 +152,14 @@ Kept in NOTES.md, the single list. Not repeated here so the two cannot drift.
  
 **Key decision:** a public endpoint spending the Claude API key needs a plan. Rate limiting, a demo mode with cached responses, or exposing only the rule-based fast path. Decided deliberately and documented.
  
-**Exit criteria:** push triggers test-and-build; deploy succeeds; public URL responds; key exposure decision implemented; closeout ritual.
+**Exit criteria:** push triggers ruff, the one-title smoke test and the image build; deploy succeeds; public URL responds; `/health` returns the package version; key exposure decision implemented; deployed README has a Known issues section pointing at NOTES.md; closeout ritual.
  
 **Estimated effort:** one to two sessions.
  
+## Phase 9: Frontend
+
+React with TypeScript, calls the Phase 3 API, replaces the Streamlit review app. Detailed at Phase 5 closeout.
+
 ## Optional after Phase 6: LangGraph wrap
  
 One session. Wrap the escalation agent in LangGraph. Not because it is better engineering than the raw API version, but because LangChain or LangGraph is named in four of ten JDs reviewed this month and the keyword filter is literal. Only after the raw version exists and works.
@@ -202,19 +190,17 @@ Unchanged from the original plan. Detailed at Phase 7 closeout.
 |---|---|
 | 0 Readiness | Done 31 Aug |
 | 1 Refactor | Through 28 Sep |
-| 6 Evaluate | 3 to 11 Oct |
-| 2 Test | 17 to 18 Oct |
-| 3 Serve | 24 to 25 Oct |
-| 4 Containerise | 31 Oct to 1 Nov |
-| 5 Automate and deploy | 7 to 8 Nov |
+| 3 Serve | 3 to 4 Oct |
+| 4 Containerise | 10 to 11 Oct |
+| 5 Automate and deploy | 17 to 18 Oct |
+| 6 Evaluate | 24 Oct to 1 Nov |
+| 2 Test | 7 to 8 Nov |
 | Buffer | Rest of November |
 | LangGraph wrap | Optional, December |
 | 7 Train | 2027 |
 | 8 Compare | 2027 |
  
 Mid-November: a deployed, tested, measured public system. Applications sent in September cycle back in October and November; panels in November see the repo finished.
- 
-Skipped sessions shift the plan; they do not break it.
  
 ## Hardware and housekeeping
  
@@ -236,7 +222,3 @@ Skipped sessions shift the plan; they do not break it.
 ## What this document is
  
 The plan and the sequence. The curriculum is the effort itself. The standard the effort answers to: nothing gets copy-pasted whose why you have not lived. If code ships but the concept did not land, the step is not done.
- 
-Rolling-wave: categories locked, steps earned, later phases detailed only on arrival.
- 
-Reviewed at every phase closeout. Strike what the work has disproven, re-detail what it has taught, confirm the next phase still deserves its place.
