@@ -118,9 +118,11 @@ Each module runs the build protocol in CLAUDE.md. Progress: NOTES.md.
  
 **Addition, 4 September:** instrument the service with Langfuse. Trace, cost, latency and confidence per call. This is the entry point to the AgentOps layer named in McKinsey, Mastercard and Temasek JDs, and it converts "I designed confidence-tiered routing to manage cost" into a dashboard.
  
-**Key decision:** what the response schema exposes.
+**Required fix:** `get_client()` in place of the client built at import, as part of API design (known bug in NOTES.md). Its test lands in Phase 2.
+
+**Key decision:** what the response schema exposes. Includes the fast-path open question in NOTES.md.
  
-**Exit criteria:** `uvicorn` serves locally; both endpoints behave; invalid input returns clean 422s; docs render; Langfuse traces visible; closeout ritual.
+**Exit criteria:** `uvicorn` serves locally; `get_client()` in place; both endpoints behave; invalid input returns clean 422s; docs render; Langfuse traces visible; closeout ritual.
  
 **Estimated effort:** one to two sessions.
  
@@ -142,7 +144,7 @@ Each module runs the build protocol in CLAUDE.md. Progress: NOTES.md.
  
 ## Phase 5: Automate and deploy
  
-**Outcome:** GitHub Actions runs ruff and a one-title smoke test, and builds the image, on every push; the container deploys; a public URL exists. The smoke test stands in until Phase 2's pytest suite replaces it.
+**Outcome:** GitHub Actions runs ruff and a smoke test, and builds the image, on every push; the container deploys; a public URL exists. The smoke test imports the package, loads SSOC, retrieves candidates for one title and asserts the list is non-empty. No API call, no secret. It stands in until Phase 2's pytest suite replaces it.
  
 **Change, 5 September:** deploy target is Azure Container Apps, not Cloud Run. Azure is what Singapore enterprises run and it is named in Shell's and Chanel's JDs. Cloud Run remains a fallback if Azure's free tier proves awkward.
  
@@ -152,7 +154,7 @@ Each module runs the build protocol in CLAUDE.md. Progress: NOTES.md.
  
 **Key decision:** a public endpoint spending the Claude API key needs a plan. Rate limiting, a demo mode with cached responses, or exposing only the rule-based fast path. Decided deliberately and documented.
  
-**Exit criteria:** push triggers ruff, the one-title smoke test and the image build; deploy succeeds; public URL responds; `/health` returns the package version; key exposure decision implemented; deployed README has a Known issues section pointing at NOTES.md; closeout ritual.
+**Exit criteria:** push triggers ruff, the smoke test and the image build; deploy succeeds; public URL responds; `/health` returns the package version; key exposure decision implemented; deployed README has a Known issues section pointing at NOTES.md; closeout ritual.
  
 **Estimated effort:** one to two sessions.
  

@@ -28,7 +28,7 @@ Packaging: pyproject.toml with hatchling, src layout, runtime and dev deps split
 ## Known bugs, logged not fixed
 Fix plan: roadmap Phase 2, unless an entry says otherwise.
 - normalise: substring match. 'ns man' catches Operations Manager, Communications Manager, Admissions Manager, Relations Manager. 'nil' catches Manila, Vanilla. Fix with word boundaries and a test on all six titles.
-- config: client constructed at import. Importing config needs a valid key. Fix: get_client().
+- config: client constructed at import. Importing config needs a valid key. Fix: get_client(). Decided 14 Sep: fix pulled into Phase 3 as part of API design; its test follows in Phase 2.
 - loaders: DATA_DIR resolves relative to the source file. Breaks in a container. Fix: env var with current path as fallback. Decided 14 Sep: fix pulled into Phase 4 as required, since the container runs before Phase 2; its test follows in Phase 2.
 - loaders: openpyxl warnings not suppressed. Notebook cell 1 did this.
 - loaders: no column validation after read_excel. If SingStat shifts header=4, columns misname silently.
@@ -40,7 +40,7 @@ Fix plan: roadmap Phase 2, unless an entry says otherwise.
 - cell 9: except Exception as e: print(...) in the batch loop swallows row failures. Same class as cell 7.
 
 ## Open questions
-- Fast path never skips the LLM. Cell 9 process_row calls classify_title on every row, including rows preprocess already labelled. The rule label only feeds AGREE/DISAGREE. Cell 0 says the rules fast-path obvious cases before the LLM. Bug or intended validation design? Decide before Phase 6, since it shapes the fast-path stratum. Decided 14 Sep for empty titles only: they skip the LLM from Phase 2. Other fast-path rows still open.
+- Fast path never skips the LLM. Cell 9 process_row calls classify_title on every row, including rows preprocess already labelled. The rule label only feeds AGREE/DISAGREE. Cell 0 says the rules fast-path obvious cases before the LLM. Bug or intended validation design? Decided 14 Sep: settled in the Phase 3 drill as an API contract question (what /classify does for a title the rules already labelled). The answer also shapes the Phase 6 fast-path stratum. Decided 14 Sep for empty titles only: they skip the LLM from Phase 2. Other fast-path rows still open.
 
 ## Decisions
 
@@ -69,3 +69,4 @@ Fix plan: roadmap Phase 2, unless an entry says otherwise.
 - Found the normalise parity break. Logged above.
 - Restructured the three docs so each fact lives in one file.
 - Goal reworded: knowing the whys and explaining the work matters, not typing it. Execution order changed and Phase 9 placeholder added. The three breaks that caused were resolved: smoke test in Phase 5 CI, DATA_DIR fix in Phase 4, Known issues and version on the deploy. Details: CLAUDE.md "Who" and the roadmap.
+- Phase 5 smoke test changed to retrieval only, no API call and no secret. get_client pulled into Phase 3. Fast-path question moved to the Phase 3 drill.
